@@ -15,13 +15,12 @@ class AppRouter {
   const AppRouter._();
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
-    // args is data parameter if we want pass data to other screen
-    // final args = settings.arguments;
+    
     switch (settings.name) {
       case home:
         return MaterialPageRoute(builder: (_) => ProductsOverviewScreen());
       case product_detail:
-        return MaterialPageRoute(builder: (_) => ProductDetailScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => ProductDetailScreen());
       case cart:
         return MaterialPageRoute(builder: (_) => CartScreen());
       case orders:
