@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 import '../providers/cart.dart';
+import '../repositories/orders_api.dart';
 
 class OrderItem {
   final String id;
@@ -23,13 +25,42 @@ class Orders with ChangeNotifier {
     return [..._orders];
   }
 
-  void addOrder(List<CartItem> cartProducts, double total) {
+  Future<void> fetchAndSetOrders() async {
+    
+    var api = new OrdersAPI();
+    var res = await api.fetchAndSetOrders();
+
+    final List<OrderItem> loadedOrders = [];
+    final resData = json.decode(res.body) as Map<String, dynamic>;
+    if (resData == null) {
+      return;
+    }
+    resData.forEach((orderId, orderData) {
+      loadedOrders.add(OrderItem(
+        id: orderId,
+        amount: orderData['amount'],
+        dateTime: DateTime.parse(orderData['dateTime']),
+        products: (orderData['products'] as List<dynamic>).map((el) {
+          return CartItem(id: el['id'], title: el['title'], price: el['price'], quantity: el['quantity']);
+        }).toList()
+      ));
+    });
+
+    _orders = loadedOrders.reversed.toList();
+    notifyListeners();
+  }
+
+  Future<void> addOrder(List<CartItem> cartProducts, double total) async {
+    var api = new OrdersAPI();
+    final timestamp = DateTime.now();
+    final res = await api.addOrder(cartProducts, total, timestamp);
     _orders.insert(0, OrderItem(
-      id: DateTime.now().toString(),
+      id: json.decode(res.body)['name'],
       amount: total,
-      dateTime: DateTime.now(),
+      dateTime: timestamp,
       products: cartProducts
     ));
     notifyListeners();
   }
+
 }

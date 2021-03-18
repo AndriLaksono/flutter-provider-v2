@@ -51,7 +51,7 @@ class ProductItem extends StatelessWidget {
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Testing lur'),
+                  content: Text('Product added'),
                   duration: Duration(milliseconds: 1000),
                   action: SnackBarAction(
                     label: 'UNDO', 
