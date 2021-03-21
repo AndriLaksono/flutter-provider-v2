@@ -25,10 +25,15 @@ class Orders with ChangeNotifier {
     return [..._orders];
   }
 
+  final authToken;
+  final userID;
+
+  Orders(this.authToken, this.userID, this._orders);
+
   Future<void> fetchAndSetOrders() async {
     
     var api = new OrdersAPI();
-    var res = await api.fetchAndSetOrders();
+    var res = await api.fetchAndSetOrders(authToken, userID);
 
     final List<OrderItem> loadedOrders = [];
     final resData = json.decode(res.body) as Map<String, dynamic>;
@@ -53,7 +58,8 @@ class Orders with ChangeNotifier {
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
     var api = new OrdersAPI();
     final timestamp = DateTime.now();
-    final res = await api.addOrder(cartProducts, total, timestamp);
+    final res = await api.addOrder(cartProducts, total, timestamp, authToken, userID);
+
     _orders.insert(0, OrderItem(
       id: json.decode(res.body)['name'],
       amount: total,

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'package:flutter/material.dart';
 
 import 'product.dart';
@@ -8,9 +7,12 @@ import '../../core/exceptions/http_exception.dart';
 
 class Products with ChangeNotifier {
   
-  final api = new ProductsAPI();
-
   List<Product> _items = [];
+
+  final String authToken;
+  final String userID;
+
+  Products(this.authToken, this.userID, this._items);
 
   List<Product> get items {
     return [..._items];
@@ -24,13 +26,16 @@ class Products with ChangeNotifier {
     return _items.firstWhere((element) => element.id == id);
   }
 
-  Future<void> fetchSetProducts() async {
+  Future<void> fetchSetProducts([bool filterByUser = false]) async {
     try {
       var api = new ProductsAPI();
-      var resData = await api.fetchSetProducts() as Map<String, dynamic>;
+      var resData = await api.fetchSetProducts(authToken, userID, filterByUser) as Map<String, dynamic>;
       if (resData == null) {
         return;
       }
+      final resFav = await api.userFavorites(authToken, userID);
+      final resFavData = json.decode(resFav.body);
+
       final List<Product> loadedProducts = [];
       resData.forEach((prodId, prodData) {
         loadedProducts.add(Product(
@@ -38,7 +43,7 @@ class Products with ChangeNotifier {
           title: prodData['title'],
           description: prodData['description'],
           price: prodData['price'],
-          isFavorite: prodData['isFavorite'],
+          isFavorite: resFavData == null ? false : (resFavData[prodId] ?? false),
           imageUrl: prodData['imageUrl']));
       });
       _items = loadedProducts;
@@ -51,7 +56,7 @@ class Products with ChangeNotifier {
   Future<bool> addProduct(Product product) async {
     try {
       var api = new ProductsAPI();
-      var result = await api.addProduct(product);
+      var result = await api.addProduct(product, authToken, userID);
 
       final newProduct = Product(
         id: json.decode(result.body)['name'],
@@ -73,7 +78,7 @@ class Products with ChangeNotifier {
       final prodIndex = _items.indexWhere((element) => element.id == id);
       if (prodIndex>= 0) {
         var api = new ProductsAPI();
-        await api.updateProduct(newProduct, id);
+        await api.updateProduct(newProduct, id, authToken);
         _items[prodIndex] = newProduct;
         notifyListeners();
       } else {
@@ -91,7 +96,8 @@ class Products with ChangeNotifier {
     notifyListeners();
 
     // delete
-    var delete = await api.deleteProduct(id);
+    final api = new ProductsAPI();
+    var delete = await api.deleteProduct(id, authToken);
 
     if(delete == false) {
       _items.insert(existingProductIndex, existingProduct);

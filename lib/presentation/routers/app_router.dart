@@ -7,9 +7,13 @@ import '../screens/cart_screen.dart';
 import '../screens/orders_screen.dart';
 import '../screens/user_products_screen.dart';
 import '../screens/edit_product_screen.dart';
+import '../screens/auth_screen.dart';
+import '../screens/splash_screen.dart';
 
 class AppRouter {
   static const String home = '/';
+  static const String auth = '/auth';
+  static const String splashscreen = '/splashscreen';
   static const String product_detail = '/product-detail';
   static const String cart = '/cart';
   static const String orders = '/orders';
@@ -21,6 +25,10 @@ class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     
     switch (settings.name) {
+      case auth:
+        return MaterialPageRoute(builder: (_) => AuthScreen());
+      case splashscreen:
+        return MaterialPageRoute(builder: (_) => SplashScreen());
       case home:
         return MaterialPageRoute(builder: (_) => ProductsOverviewScreen());
       case product_detail:

@@ -23,14 +23,14 @@ class Product with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> toggleFavoriteStatus() async {
+  Future<void> toggleFavoriteStatus(String authToken, String userID) async {
     final oldStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
 
     try {
       var api = new ProductAPI();
-      var res = await api.toggleFavoriteStatus(isFavorite, id);
+      var res = await api.toggleFavoriteStatus(isFavorite, id, authToken, userID);
       if (res.statusCode >= 400) {
         _setFavValue(oldStatus);
       }
